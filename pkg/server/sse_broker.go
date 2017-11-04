@@ -79,7 +79,7 @@ func (b *Broker) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		b.RemoveClient(client)
 	}()
 
-	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Content-Type", "text/event-stream;charset=UTF-8")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
 
