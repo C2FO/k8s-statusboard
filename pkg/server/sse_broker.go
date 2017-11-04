@@ -1,5 +1,10 @@
 package server
 
+import (
+	"fmt"
+	"net/http"
+)
+
 // Broker is the message broker that handles broadcasting the messages to each
 // client.
 type Broker struct {
@@ -55,4 +60,36 @@ func (b *Broker) RemoveClient(c chan []byte) {
 // Send sends a message to all of the clients
 func (b *Broker) Send(msg []byte) {
 	b.in <- msg
+}
+
+func (b *Broker) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	f, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "Streaming unsupported!", http.StatusInternalServerError)
+		return
+	}
+
+	client := make(chan []byte)
+	b.AddClient(client)
+
+	// When the connection is closed, remove the client from the broker
+	notify := w.(http.CloseNotifier).CloseNotify()
+	go func() {
+		<-notify
+		b.RemoveClient(client)
+	}()
+
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+
+	for {
+		msg, ok := <-client
+		if !ok {
+			break // The channel was closed b/c the client disconnected
+		}
+
+		fmt.Fprintf(w, "%s\n\n", msg)
+		f.Flush()
+	}
 }
