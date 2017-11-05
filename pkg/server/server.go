@@ -2,9 +2,12 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/c2fo/k8s-statusboard/pkg/k8s"
 )
 
 // StatusServer will be responsible for serving our very basic index page,
@@ -32,10 +35,11 @@ func (s *StatusServer) addRoutes() {
 	if err != nil {
 		panic(err)
 	}
+
 	// Delegate the events route to our broker which implements ServeHTTP
 	http.Handle("/events/", s.broker)
-	fs := http.FileServer(http.Dir(wd))
-	http.Handle("/", fs)
+	http.Handle("/api/", API{})
+	http.Handle("/", http.FileServer(http.Dir(wd)))
 }
 
 // Start starts the StatusServer
@@ -51,12 +55,23 @@ func (s *StatusServer) Start() {
 }
 
 func (s *StatusServer) publishK8sStatus() {
-	// Get k8s clusters.
-	// Get Pods stats for each
-	// Send events
-	s.sendEvent("my-event", []byte("hello"))
+	for _, context := range k8s.Contexts() {
+		// Make each request in parallel
+		go func(context string) {
+			pods, err := k8s.Pods(context)
+			if err != nil {
+				log.Printf("Error getting pods for %s: %s", context, err)
+			}
+
+			ps := PodsStatus{
+				Context: context,
+				Pods:    pods,
+			}
+			s.sendEvent(ps.ToEvent())
+		}(context)
+	}
 }
 
-func (s *StatusServer) sendEvent(event string, data []byte) {
-	s.broker.Send(NewEvent("", event, data).ToBytes())
+func (s *StatusServer) sendEvent(e Event) {
+	s.broker.Send(e.ToBytes())
 }

@@ -2,16 +2,10 @@
   <head>
   </head>
   <body>
-    <h1>Hello</h1>
-    <script type="text/javascript">
-      var es = new EventSource("/events/");
-      es.addEventListener("my-event", function(e){
-        console.log(e);
-
-      })
-      es.onmessage = function(e) {
-        console.log(e);
-      }
-    </script>
+    <h1>K8s StatuPage</h1>
+    <div id="context-container">
+    </div>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+    <script src="app.js"></script>
   </body>
 </html>

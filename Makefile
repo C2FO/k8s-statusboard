@@ -1,7 +1,7 @@
 
 .PHONY: build
 build:
-	go build ./...
+	go build ./cmd/...
 
 .PHONY: install
 install:
