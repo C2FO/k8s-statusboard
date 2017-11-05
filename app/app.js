@@ -60,6 +60,15 @@ angular.module('k8sStatusApp', [])
       name: '=',
       metrics: '='
     },
-    templateUrl: 'context-metrics.html',
+    controller: [ "$scope", function($scope){
+      $scope.cardClass = function() {
+        if($scope.metrics.notRunning == 0) {
+          return 'green';
+        } else {
+          return 'red';
+        }
+      };
+    }],
+    templateUrl: 'context-metrics.html'
   };
 });
