@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/c2fo/k8s-statusboard/pkg/k8s"
@@ -22,7 +23,7 @@ type StatusServer struct {
 func NewStatusServer(port int) *StatusServer {
 	s := &StatusServer{
 		port:          port,
-		pollingPeriod: 5 * time.Second,
+		pollingPeriod: 15 * time.Second,
 		broker:        NewBroker(),
 	}
 	s.addRoutes()
@@ -39,7 +40,7 @@ func (s *StatusServer) addRoutes() {
 	// Delegate the events route to our broker which implements ServeHTTP
 	http.Handle("/events/", s.broker)
 	http.Handle("/api/", API{})
-	http.Handle("/", http.FileServer(http.Dir(wd)))
+	http.Handle("/", http.FileServer(http.Dir(filepath.Join(wd, "app"))))
 }
 
 // Start starts the StatusServer

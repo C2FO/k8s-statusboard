@@ -1,4 +1,10 @@
 
+// var app = angular.module('k8sStatusApp');
+// app.controller('mainController', function($scope) {
+//     // create a message to display in our view
+//     $scope.title = 'K8S StatusBoard';
+// });
+
 // Initially get the contexts and add divs for them to the dom.
 $.get("/api/contexts", function(data, status){
   data.forEach(function(context){
@@ -15,14 +21,12 @@ function getPodMetrics(pods) {
     notRunning: 0,
   };
   pods.forEach(function(pod){
-    console.log(pod);
     if (pod.status.phase == "Succeeded"){
       metrics.succeeded += 1;
     } else if (pod.status.phase == "Running") {
       metrics.running += 1;
     } else {
       metrics.notRunning += 1;
-      console.log("Not Running: " + pod.metadata.name);
     }
   });
   return metrics;
