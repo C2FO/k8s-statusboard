@@ -10,15 +10,17 @@ import (
 // StatusServer will be responsible for serving our very basic index page,
 // its assets, and the broadcasting the server sent events.
 type StatusServer struct {
-	port   int
-	broker *Broker
+	broker        *Broker
+	port          int
+	pollingPeriod time.Duration
 }
 
 // NewStatusServer creates and initializes a new StatusServer
 func NewStatusServer(port int) *StatusServer {
 	s := &StatusServer{
-		port:   port,
-		broker: NewBroker(),
+		port:          port,
+		pollingPeriod: 15 * time.Second,
+		broker:        NewBroker(),
 	}
 	s.addRoutes()
 	s.broker.Start()
@@ -30,29 +32,31 @@ func (s *StatusServer) addRoutes() {
 	if err != nil {
 		panic(err)
 	}
+	// Delegate the events route to our broker which implements ServeHTTP
 	http.Handle("/events/", s.broker)
 	fs := http.FileServer(http.Dir(wd))
 	http.Handle("/", fs)
-	// Delegate the events route to our broker which implements ServeHTTP
 }
 
 // Start starts the StatusServer
 func (s *StatusServer) Start() {
 	go func() {
 		for {
-			time.Sleep(10 * time.Second)
-			s.broker.Send(
-				NewEvent("", "my-event", []byte("hello")).ToBytes(),
-			)
+			time.Sleep(s.pollingPeriod)
+			s.publishK8sStatus()
 		}
 	}()
 
 	http.ListenAndServe(fmt.Sprintf(":%d", s.port), nil)
+}
 
-	// Loop over our kubernetes clusters and gather information about them every
-	// so often so we can send data to our clients.
-	// Get some data. Make a new event. and send it.
-	// e := NewEvent(...)
-	// s.broker.Send(e.ToBytes())
-	//
+func (s *StatusServer) publishK8sStatus() {
+	// Get k8s clusters.
+	// Get Pods stats for each
+	// Send events
+	s.sendEvent("my-event", []byte("hello"))
+}
+
+func (s *StatusServer) sendEvent(event string, data []byte) {
+	s.broker.Send(NewEvent("", event, data).ToBytes())
 }
