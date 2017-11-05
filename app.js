@@ -34,5 +34,5 @@ es.addEventListener("pod-status", function(e){
   var obj = JSON.parse(e.data);
   var container = $("div#context-" + obj.context).empty();
   var metrics = getPodMetrics(obj.pods);
-  container.first().html("<h3>" + obj.context + "</h3>" + "<p>Running: " + metrics.running + " Not Running: " + metrics.notRunning + "</p>");
+  container.first().html('<div class="col s4"><h4>' + obj.context + "</h4>" + "<p>Running: " + metrics.running + " Not Running: " + metrics.notRunning + "</p></div>");
 });
