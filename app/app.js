@@ -47,7 +47,7 @@ angular.module('k8sStatusApp', [])
       for(var i = 0; i < $scope.contexts.length; i++){
         if($scope.contexts[i].name == obj.context) {
           $scope.contexts[i].update(obj.pods);
-          $scope.$apply();
+          $scope.$apply(); // Import to get re-renders.
         }
       }
     });
