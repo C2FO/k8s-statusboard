@@ -11,11 +11,12 @@
   <body ng-app="k8sStatusApp" ng-controller="mainController">
     <div class="container">
       <div class="row">
-        <h1>{{title}}</h1>
+        <h1 class="center-align">{{title}}</h1>
       </div>
       <div class="row" id="context-container">
-        <context-metrics ng-repeat="c in contexts" name="c.name" metrics="c.metrics" id="context-{{c.name}}">
-        </context-metrics>
+        <div class="col s12 m6 l4" ng-repeat="c in contexts">
+          <context-metrics name="c.name" metrics="c.metrics" id="context-{{c.name}}"></context-metrics>
+        </div>
       </div>
     </div>
 

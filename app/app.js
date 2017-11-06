@@ -61,7 +61,7 @@ angular.module('k8sStatusApp', [])
       metrics: '='
     },
     controller: [ "$scope", function($scope){
-      $scope.cardClass = function() {
+      $scope.contextClass = function() {
         if($scope.metrics.notRunning == 0) {
           return 'green';
         } else {
