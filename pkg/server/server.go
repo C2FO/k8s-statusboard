@@ -58,19 +58,35 @@ func (s *StatusServer) Start() {
 func (s *StatusServer) publishK8sStatus() {
 	for _, context := range k8s.Contexts() {
 		// Make each request in parallel
-		go func(context string) {
-			pods, err := k8s.Pods(context)
-			if err != nil {
-				log.Printf("Error getting pods for %s: %s", context, err)
-			}
-
-			ps := PodsStatus{
-				Context: context,
-				Pods:    pods,
-			}
-			s.sendEvent(ps.ToEvent())
-		}(context)
+		go s.sendPods(context)
+		go s.sendJobs(context)
 	}
+}
+
+func (s *StatusServer) sendPods(context string) {
+	pods, err := k8s.Pods(context)
+	if err != nil {
+		log.Printf("Error getting pods for %s: %s", context, err)
+	}
+
+	ps := PodsStatus{
+		Context: context,
+		Pods:    pods,
+	}
+	s.sendEvent(ps.ToEvent())
+}
+
+func (s *StatusServer) sendJobs(context string) {
+	jobs, err := k8s.Jobs(context)
+	if err != nil {
+		log.Printf("Error getting jobs for %s: %s", context, err)
+	}
+
+	js := JobsStatus{
+		Context: context,
+		Jobs:    jobs,
+	}
+	s.sendEvent(js.ToEvent())
 }
 
 func (s *StatusServer) sendEvent(e Event) {
