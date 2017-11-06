@@ -1,4 +1,4 @@
-function Metrics(pods) {
+function PodMetrics(pods) {
   this.running = 0;
   this.notRunning = 0;
   this.succeeded = 0;
@@ -32,12 +32,35 @@ function Metrics(pods) {
   }
 }
 
+function JobMetrics(jobs) {
+  this.desired = 0;
+  this.succeeded = 0;
+  if (arguments.length > 0) {
+    for (var i=0; i < jobs.length; i ++){
+      var status = jobs[i].status;
+      var spec = jobs[i].spec;
+      
+      if (spec.hasOwnProperty('completions')) {
+        this.desired += spec.completions;
+      }
+
+      if (status.hasOwnProperty('succeeded')) {
+        this.succeeded += status.succeeded;
+      }
+    }
+  }
+}
+
 function Context(name) {
   var self = this;
   this.name = name;
-  this.metrics = new Metrics();
-  this.update = function(pods) {
-    self.metrics = new Metrics(pods);
+  this.pod_metrics = new PodMetrics();
+  this.job_metrics = new JobMetrics();
+  this.updatePods = function(pods) {
+    self.pod_metrics = new PodMetrics(pods);
+  };
+  this.updateJobs = function(jobs) {
+    self.job_metrics = new JobMetrics(jobs);
   };
 }
 
@@ -62,8 +85,18 @@ angular.module('k8sStatusApp', [])
       var obj = JSON.parse(e.data);
       for(var i = 0; i < $scope.contexts.length; i++){
         if($scope.contexts[i].name == obj.context) {
-          $scope.contexts[i].update(obj.pods);
-          $scope.$apply(); // Import to get re-renders.
+          $scope.contexts[i].updatePods(obj.pods);
+          $scope.$apply(); // Important to get re-renders.
+        }
+      }
+    });
+    
+    es.addEventListener("job-status", function(e){
+      var obj = JSON.parse(e.data);
+      for(var i = 0; i < $scope.contexts.length; i++){
+        if($scope.contexts[i].name == obj.context) {
+          $scope.contexts[i].updateJobs(obj.jobs);
+          $scope.$apply(); // Important to get re-renders.
         }
       }
     });
@@ -74,15 +107,17 @@ angular.module('k8sStatusApp', [])
     replace: true,
     scope: {
       name: '=',
-      metrics: '='
+      podMetrics: '=',
+      jobMetrics: '=',
     },
     controller: [ "$scope", function($scope){
       $scope.contextClass = function() {
-        if($scope.metrics.notRunning == 0) {
-          return 'green';
-        } else {
-          return 'red';
+        if($scope.podMetrics.notRunning == 0) {
+          if($scope.jobMetrics.desired <= $scope.jobMetrics.succeeded) {
+            return 'green';
+          }
         }
+        return 'red';
       };
     }],
     templateUrl: 'context-metrics.html'

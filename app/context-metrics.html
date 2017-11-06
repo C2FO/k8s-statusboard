@@ -6,12 +6,21 @@
   <li class="collection-item">
     <h5>Pods</h5>
     <div class="row valign-wrapper">
-      <div class="col s3"><h4>{{metrics.running}}</h4></div>
+      <div class="col s3"><h4>{{podMetrics.running}}</h4></div>
       <div class="col s9"><h5>Running</h5></div>
     </div>
     <div class="row valign-wrapper">
-      <div class="col s3"><h4>{{metrics.notRunning}}</h4></div>
+      <div class="col s3"><h4>{{podMetrics.notRunning}}</h4></div>
       <div class="col s9"><h5>Not Running</h5></div>
+    </div>
+    <h5>Jobs</h5>
+    <div class="row valign-wrapper">
+      <div class="col s3"><h4>{{jobMetrics.desired}}</h4></div>
+      <div class="col s9"><h5>Desired</h5></div>
+    </div>
+    <div class="row valign-wrapper">
+      <div class="col s3"><h4>{{jobMetrics.succeeded}}</h4></div>
+      <div class="col s9"><h5>Succeeded</h5></div>
     </div>
   </li>
 </ul>
