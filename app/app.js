@@ -8,9 +8,25 @@ function Metrics(pods) {
       if (phase == "Succeeded"){
         this.succeeded += 1;
       } else if (phase == "Running"){
-        this.running += 1;
+        // Now when the phase is running, we still need to check the array of
+        // pod.status.containerStatuses
+        var isRunning = true;
+        var containerStatuses = pods[i].status.containerStatuses;
+        for (var j=0; j < containerStatuses.length; j++) {
+          if (!containerStatuses[j].state.hasOwnProperty('running')) {
+            // at least one of the containers is not Running.
+            isRunning = false;
+          }
+        }
+        if (isRunning) {
+          this.running += 1;
+        } else {
+          this.notRunning += 1;
+          console.log("Pod " + pods[i].metadata.name + " is not running");
+        }
       } else {
         this.notRunning += 1;
+        console.log("Pod " + pods[i].metadata.name + " is not running");
       }
     }
   }

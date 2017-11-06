@@ -23,7 +23,7 @@ type StatusServer struct {
 func NewStatusServer(port int) *StatusServer {
 	s := &StatusServer{
 		port:          port,
-		pollingPeriod: 5 * time.Second,
+		pollingPeriod: 10 * time.Second,
 		broker:        NewBroker(),
 	}
 	s.addRoutes()
