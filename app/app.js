@@ -72,7 +72,7 @@ angular.module('k8sStatusApp', [])
     $scope.contexts = [];
 
     // Load the initial contexts
-    $http.get("/api/contexts")
+    $http.get("./api/contexts")
       .success(function(data){
         data.forEach(function(contextName){
           $scope.contexts.push(new Context(contextName));
@@ -80,7 +80,7 @@ angular.module('k8sStatusApp', [])
       });
 
     // Event source to 
-    var es = new EventSource("/events/");
+    var es = new EventSource("./events/");
     es.addEventListener("pod-status", function(e){
       var obj = JSON.parse(e.data);
       for(var i = 0; i < $scope.contexts.length; i++){
