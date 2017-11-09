@@ -1,7 +1,11 @@
 # k8s-statusboard
 
+![k8s-statusboard](doc/screen-shot.png)
+
 A dashboard to aggregate metrics and provide a quick view into the health of
-multiple environments across different Kubernetes clusters & namespaces.
+multiple environments across different Kubernetes clusters & namespaces. In the
+above example, the 3 environments are running in 3 different namespaces across
+2 separate clusters.
 
 ## Building & Running the docker image
 
