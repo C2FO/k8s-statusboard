@@ -83,6 +83,12 @@ func (b *Broker) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
 
+	// Send latest events first so page isn't waiting until next update
+	for _, e := range getLatestEvents() {
+		fmt.Fprintf(w, "%s\n\n", e.ToBytes())
+		f.Flush()
+	}
+
 	for {
 		msg, ok := <-client
 		if !ok {
