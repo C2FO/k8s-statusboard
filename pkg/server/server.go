@@ -73,7 +73,7 @@ func (s *StatusServer) sendPods(context string) {
 		Context: context,
 		Pods:    pods,
 	}
-	s.sendEvent(ps.ToEvent())
+	s.updateStoreAndSend(context, ps)
 }
 
 func (s *StatusServer) sendJobs(context string) {
@@ -86,7 +86,13 @@ func (s *StatusServer) sendJobs(context string) {
 		Context: context,
 		Jobs:    jobs,
 	}
-	s.sendEvent(js.ToEvent())
+	s.updateStoreAndSend(context, js)
+}
+
+func (s *StatusServer) updateStoreAndSend(context string, ei Eventer) {
+	e := ei.ToEvent()
+	addToEventStore(context, e)
+	s.sendEvent(e)
 }
 
 func (s *StatusServer) sendEvent(e Event) {
