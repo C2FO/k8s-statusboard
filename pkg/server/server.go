@@ -60,6 +60,7 @@ func (s *StatusServer) publishK8sStatus() {
 		// Make each request in parallel
 		go s.sendPods(context)
 		go s.sendJobs(context)
+		go s.sendServices(context)
 	}
 }
 
@@ -87,6 +88,19 @@ func (s *StatusServer) sendJobs(context string) {
 		Jobs:    jobs,
 	}
 	s.updateStoreAndSend(context, js)
+}
+
+func (s *StatusServer) sendServices(context string) {
+	services, err := k8s.Services(context)
+	if err != nil {
+		log.Printf("Error getting services for %s: %s", context, err)
+	}
+
+	ss := ServicesStatus{
+		Context:  context,
+		Services: services,
+	}
+	s.updateStoreAndSend(context, ss)
 }
 
 func (s *StatusServer) updateStoreAndSend(context string, ei Eventer) {

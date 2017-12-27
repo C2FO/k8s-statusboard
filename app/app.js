@@ -2,6 +2,11 @@ function PodMetrics(pods) {
   this.running = 0;
   this.notRunning = 0;
   this.succeeded = 0;
+
+  if (typeof pods == 'undefined' || pods === null) {
+    return;
+  }
+
   if (arguments.length > 0) {
     for (var i=0; i < pods.length; i ++){
       var phase = pods[i].status.phase;
@@ -35,8 +40,13 @@ function PodMetrics(pods) {
 function JobMetrics(jobs) {
   this.desired = 0;
   this.succeeded = 0;
+
+  if (typeof jobs == 'undefined' || jobs === null) {
+    return;
+  }
+
   if (arguments.length > 0) {
-    for (var i=0; i < jobs.length; i ++){
+    for (var i=0; i < jobs.length; i++){
       var status = jobs[i].status;
       var spec = jobs[i].spec;
       
@@ -51,16 +61,53 @@ function JobMetrics(jobs) {
   }
 }
 
+function ServiceMetrics(services) {
+  this.loadBalancer = 0;
+  this.externalName = 0;
+  this.clusterIP = 0;
+  this.nodePort = 0;
+
+  if (typeof services == 'undefined' || services === null) {
+    return;
+  }
+
+  if (arguments.length > 0) {
+    for (var i=0; i < services.length; i++){
+      var spec = services[i].spec;
+
+      if (spec.hasOwnProperty('type')) {
+        var type = spec.type;
+        if (type === 'NodePort') {
+          this.nodePort += 1;
+        } else if (type === 'ClusterIP') {
+          this.clusterIP += 1;
+        } else if (type === 'ExternalName') {
+          this.externalName += 1;
+        } else if (type === 'LoadBalancer') {
+          this.loadBalancer += 1;
+        } else {
+          console.log(type);
+        }
+      }
+    }
+  }
+}
+
 function Context(name) {
   var self = this;
   this.name = name;
   this.pod_metrics = new PodMetrics();
   this.job_metrics = new JobMetrics();
+  this.service_metrics = new ServiceMetrics();
+
   this.updatePods = function(pods) {
     self.pod_metrics = new PodMetrics(pods);
   };
   this.updateJobs = function(jobs) {
     self.job_metrics = new JobMetrics(jobs);
+  };
+  this.updateServices = function(services) {
+    self.service_metrics = new ServiceMetrics(services);
   };
 }
 
@@ -100,6 +147,16 @@ angular.module('k8sStatusApp', [])
         }
       }
     });
+
+    es.addEventListener("services-status", function(e){
+      var obj = JSON.parse(e.data);
+      for(var i = 0; i < $scope.contexts.length; i++){
+        if($scope.contexts[i].name == obj.context) {
+          $scope.contexts[i].updateServices(obj.services);
+          $scope.$apply(); // Important to get re-renders.
+        }
+      }
+    });
 })
 .directive('contextMetrics', function(){
   return {
@@ -109,6 +166,7 @@ angular.module('k8sStatusApp', [])
       name: '=',
       podMetrics: '=',
       jobMetrics: '=',
+      serviceMetrics: '='
     },
     controller: [ "$scope", function($scope){
       $scope.contextClass = function() {
