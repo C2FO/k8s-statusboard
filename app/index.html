@@ -15,7 +15,7 @@
       </div>
       <div class="row" id="context-container">
         <div class="col s12 m6 l4" ng-repeat="c in contexts">
-          <context-metrics name="c.name" pod-metrics="c.pod_metrics" job-metrics="c.job_metrics" id="context-{{c.name}}"></context-metrics>
+          <context-metrics name="c.name" pod-metrics="c.pod_metrics" job-metrics="c.job_metrics" service-metrics="c.service_metrics" id="context-{{c.name}}"></context-metrics>
         </div>
       </div>
     </div>
