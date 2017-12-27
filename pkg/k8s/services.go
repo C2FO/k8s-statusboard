@@ -7,7 +7,7 @@ import (
 	"k8s.io/client-go/pkg/api/v1"
 )
 
-// Pods returns the pods for a given context
+// Services returns the pods for a given context
 func Services(context string) ([]v1.Service, error) {
 	cs, err := getClientSet(context)
 	if err != nil {
