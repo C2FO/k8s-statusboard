@@ -4,7 +4,7 @@ RUN mkdir -p /go/src/github.com/c2fo/k8s-statusboard
 ADD . /go/src/github.com/c2fo/k8s-statusboard
 RUN go get -u github.com/golang/dep/cmd/dep
 WORKDIR /go/src/github.com/c2fo/k8s-statusboard
-RUN dep ensure
+RUN dep ensure -v
 RUN go build -o k8s-statusboard ./cmd/k8s-status-server/main.go
 
 FROM alpine
