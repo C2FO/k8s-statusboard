@@ -14,9 +14,11 @@ import (
 // StatusServer will be responsible for serving our very basic index page,
 // its assets, and the broadcasting the server sent events.
 type StatusServer struct {
-	broker        *Broker
-	port          int
+	broker *Broker
+	port   int
+
 	pollingPeriod time.Duration
+	eventFuncs    []func(string)
 }
 
 // NewStatusServer creates and initializes a new StatusServer
@@ -25,6 +27,12 @@ func NewStatusServer(port int) *StatusServer {
 		port:          port,
 		pollingPeriod: 10 * time.Second,
 		broker:        NewBroker(),
+	}
+	// Add event functions that we want to happen every x amount of seconds.
+	s.eventFuncs = []func(string){
+		s.sendPods,
+		s.sendJobs,
+		s.sendServices,
 	}
 	s.addRoutes()
 	s.broker.Start()
@@ -45,23 +53,21 @@ func (s *StatusServer) addRoutes() {
 
 // Start starts the StatusServer
 func (s *StatusServer) Start() {
+	// Go routine to constantly refresh data from all contexts.
 	go func() {
+		sleepTime := time.Duration(s.pollingPeriod.Nanoseconds() / int64(len(s.eventFuncs)))
 		for {
-			time.Sleep(s.pollingPeriod)
-			s.publishK8sStatus()
+			// For each of the event functions,
+			for _, f := range s.eventFuncs {
+				for _, context := range k8s.Contexts() {
+					go f(context)
+				}
+				time.Sleep(sleepTime)
+			}
 		}
 	}()
 
 	http.ListenAndServe(fmt.Sprintf(":%d", s.port), nil)
-}
-
-func (s *StatusServer) publishK8sStatus() {
-	for _, context := range k8s.Contexts() {
-		// Make each request in parallel
-		go s.sendPods(context)
-		go s.sendJobs(context)
-		go s.sendServices(context)
-	}
 }
 
 func (s *StatusServer) sendPods(context string) {
