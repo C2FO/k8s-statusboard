@@ -1,43 +1,23 @@
 <ul class="collection with-header z-depth-1">
   <li class="collection-header white-text" ng-class="contextClass()">
-    <h4>{{name}}</h4>
+    <h6>{{name}}</h6>
     <p></p>
   </li>
   <li class="collection-item">
-    <h5>Pods</h5>
-    <div class="row valign-wrapper">
-      <div class="col s3"><h4>{{podMetrics.running}}</h4></div>
-      <div class="col s9"><h5>Running</h5></div>
-    </div>
-    <div class="row valign-wrapper">
-      <div class="col s3"><h4>{{podMetrics.notRunning}}</h4></div>
-      <div class="col s9"><h5>Not Running</h5></div>
-    </div>
-    <h5>Jobs</h5>
-    <div class="row valign-wrapper">
-      <div class="col s3"><h4>{{jobMetrics.desired}}</h4></div>
-      <div class="col s9"><h5>Desired</h5></div>
-    </div>
-    <div class="row valign-wrapper">
-      <div class="col s3"><h4>{{jobMetrics.succeeded}}</h4></div>
-      <div class="col s9"><h5>Succeeded</h5></div>
-    </div>
-    <h5>Services</h5>
-    <div class="row valign-wrapper">
-      <div class="col s3"><h4>{{serviceMetrics.loadBalancer}}</h4></div>
-      <div class="col s9"><h5>Load Balancer</h5></div>
-    </div>
-    <div class="row valign-wrapper">
-      <div class="col s3"><h4>{{serviceMetrics.clusterIP}}</h4></div>
-      <div class="col s9"><h5>Cluster IP</h5></div>
-    </div>
-    <div class="row valign-wrapper">
-      <div class="col s3"><h4>{{serviceMetrics.nodePort}}</h4></div>
-      <div class="col s9"><h5>Node Port</h5></div>
-    </div>
-    <div class="row valign-wrapper">
-      <div class="col s3"><h4>{{serviceMetrics.externalName}}</h4></div>
-      <div class="col s9"><h5>External Name</h5></div>
-    </div>
+    <h6>Pods</h6>
+    <context-metric name="Running" value="podMetrics.running"></context-metric>
+    <context-metric name="Not Running" value="podMetrics.notRunning" ng-show="podMetrics.notRunning > 0"></context-metric>
+  </li>
+  <li class="collection-item">
+    <h6>Jobs</h6>
+    <context-metric name="Desired" value="jobMetrics.desired" ng-show="jobMetrics.desired != jobMetrics.succeeded"></context-metric>
+    <context-metric name="Succeeded" value="jobMetrics.succeeded"></context-metric>
+  </li>
+  <li class="collection-item">
+    <h6>Services</h6>
+    <context-metric name="Load Balancer" value="serviceMetrics.loadBalancer"></context-metric>
+    <context-metric name="Cluster IP" value="serviceMetrics.clusterIP"></context-metric>
+    <context-metric name="Node Port" value="serviceMetrics.nodePort"></context-metric>
+    <context-metric name="External Name" value="serviceMetrics.externalName"></context-metric>
   </li>
 </ul>
