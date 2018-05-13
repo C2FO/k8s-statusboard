@@ -49,7 +49,7 @@ function JobMetrics(jobs) {
     for (var i=0; i < jobs.length; i++){
       var status = jobs[i].status;
       var spec = jobs[i].spec;
-      
+
       if (spec.hasOwnProperty('completions')) {
         this.desired += spec.completions;
       }
@@ -126,7 +126,7 @@ angular.module('k8sStatusApp', [])
         });
       });
 
-    // Event source to 
+    // Event source to
     var es = new EventSource("./events/");
     es.addEventListener("pod-status", function(e){
       var obj = JSON.parse(e.data);
@@ -137,7 +137,7 @@ angular.module('k8sStatusApp', [])
         }
       }
     });
-    
+
     es.addEventListener("job-status", function(e){
       var obj = JSON.parse(e.data);
       for(var i = 0; i < $scope.contexts.length; i++){
@@ -157,6 +157,17 @@ angular.module('k8sStatusApp', [])
         }
       }
     });
+})
+.directive('contextMetric', function() {
+  return {
+    restrict: 'E',
+    replace: true,
+    scope: {
+      'name': '@',
+      'value': '='
+    },
+    templateUrl: 'metric.html'
+  };
 })
 .directive('contextMetrics', function(){
   return {
@@ -178,6 +189,7 @@ angular.module('k8sStatusApp', [])
         return 'red';
       };
     }],
+    transclude: true,
     templateUrl: 'context-metrics.html'
   };
 });
